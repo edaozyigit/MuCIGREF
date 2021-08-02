@@ -22,4 +22,4 @@ If you would like to reuse any part of the codes, please cite it as follows:
 
 **Ozyigit, EB (2020). MuCIGREF: Multiple Computer-interpretable Guideline Representation and Execution Framework For Managing Multimorbidity Care. PhD Thesis, University of Warwick.**
 
-For further information, please get in touch via **edaozyigit.com/Contact**
+For further information, please get in touch via **edaozyigit.com/contact**
