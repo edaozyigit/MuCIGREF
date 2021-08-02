@@ -1,0 +1,180 @@
+//Author: Eda Bilici Ozyigit
+//please see, Ozyigit, EB (2020) MuCIGREF: Multiple Computer-interpretable Guideline Representation
+// and Execution Framework For Managing Multimorbidity Care. PhD Thesis, University of Warwick
+
+// Part of MuCIGREF's verification codes is shared which are written with the Epsilon Validation Language (EVL) of Eclipse.
+// For further information , please get in touch via edaozyigit.com/contact
+
+
+
+//Each clinical activity must have a label
+
+context ClinicalActivity {
+ 
+constraint MustHaveLabel{
+
+	check:self.label<>""
+	message: self.Eclass.name + " "+ self.label + "must have a label" 
+		fix{
+			title:"Add a label for clinical activity" + " "+ self.Eclass.name + " whose " +"clinicalID" + " " + self.clinicalID 
+		do{
+			self.label:= UserInput.prompt("Add a label for"+ " " + self.Eclass.name, self.label);
+		}
+	 }
+   }
+}
+
+
+
+// The label of a clinical activity should start with an upper case letter
+// Automatic convertion letters of labels into upper letters without user input
+
+context ClinicalActivity{
+
+critique LabelShouldStartWithUpperCase{
+	check: self.label.substring(0,1)=self.label.substring(0,1).toUpperCase()
+	message: "The label of clinical activity" + " " + self.Eclass.name + " " + self.label+ " " + "should start with an upper case letter"
+	fix{
+		title:"Rename clinical activity" + " " + self.Eclass.name+ " " +self.label + " to " + self.label.firstToUpperCase()
+	do{
+		self.label=self.label.firstToUpperCase();
+		}
+	 }
+  }
+}
+
+
+
+//Check whether all the activities has a source activity
+
+context TransitionAssigned {  
+constraint MustHaveSource {
+    check : self.hasSourceActivity.isDefined() <> self.hasTargetActivity
+	message : "Clinical activity transition" + self. label + "" + "leads a directed cycle"
+  	
+   }
+}
+  
+
+
+//Check whether all the activities has a target activity
+ 
+ context TransitionAssigned {
+ 
+  constraint MustHaveTarget {
+    check : self.hasTargetActivity.isDefined()
+    message : "Transition does not have a target activity" +" " + self.label
+	
+		fix{
+			title:"Add transition for clinical activity" + " "+ self.Eclass.name 
+		 do{
+			self.label:= UserInput.prompt("Add a transition for"+ " " + self.Eclass.name, self.label);
+		  }
+	  }
+   }
+}
+
+
+//Check whether or not the defined workflow has a cycle
+
+context TransitionAssigned {
+  
+  constraint NotInCycle {
+    check :  self.hasSourceActivity <> self.hasTargetActivity
+    message : "Clinical activity transition " + self.label + " "+ "leads a directed cycle"
+ 		
+   }
+}
+
+
+//Each guideline entry must have one starting activity
+
+
+context PatientEncounter {
+  constraint MustHaveOneStart {
+    check  {
+      var numberOfStartingActivities = self.hasOutgoingTransition.label.size(); 
+      return numberOfStartingActivities == 1;
+    }
+    message : "There must be one starting activity, but there are " + numberOfStartActivities
+    
+   		 fix{
+			title:"Select 1 starting clinical activity" + " "+ self.Eclass.name 
+		 do{
+			self.label:= UserInput.prompt("Select 1 clinical activity"+ " " + self.Eclass.name, self.label);
+		  }
+	  }
+   }
+ }
+ 
+
+/*
+// Each guideline activity must have minimum one conclusion"
+context HealthCareService{
+
+constraint MustHaveAtLeastOneFinal {
+    check  {
+      var numberOfFinalActivities = self.isaHcs.select(n|n.EClass.name == "Conclusion").size(); 
+      return numberOfFinalActivities>= 1;
+    }
+    message : "There must be at least one final activity," +" "+ "but there are"  + numberOfFinalActivities
+    
+    }
+ }
+
+*/
+//Check each decision must have minimum 2 conditional options 
+
+
+context Decision{
+constraint DecisionMustHaveAtLeastTwoConditionalOptions {
+
+	check{
+		var numberOfOptions;
+		var classLabel;
+		
+		for (n in Decision){
+		numberOfOptions = n.hasOutgoingTransition.label.size();
+		classLabel= n.label;
+		return numberOfOptions >= 2;
+			}
+		} 	
+    message : "There must be at least 2 conditional options of" + " " + classLabel + ", but there are " + numberOfOptions 
+    }
+}
+
+
+// Check clinical activities whether they have missing care elements
+//e.g.,Pharmaceutical action must have a pharmaceutical care element
+//e.g., Examination action must have an examination care element
+//e.g., Procedural action must have a procedure
+//e.g., Examination action must have a result
+
+
+context PharmaceuticalAction{
+constraint PharmaceuticalActionMustHaveOneCareElement {
+
+	check{
+		var numberOfCareElements;
+		var classLabel;
+			for (n in PharmaceuticalAction){
+				numberOfCareElements = n.hasPharmaceuticalCareElement.label.size();
+				classLabel= n.label;
+			return numberOfCareElements = 1;
+		}
+	} 	
+    message : "There must be one pharmaceutical care element of" + " " + classLabel + ", but there are " + numberOfOptions 
+    	 fix{
+			title:"Pharmaceutical action has no pharmaceutical care element" + " "+ self.Eclass.name 
+		 do{
+			self.label:= UserInput.prompt("Add a pharmaceutical care element for a pharmaceutical action"+ " " + self.Eclass.name, self.label);
+		  }
+	  }
+    }
+ }
+
+
+
+
+
+
