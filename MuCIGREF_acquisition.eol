@@ -1,0 +1,57 @@
+//Author: Eda Bilici Ozyigit
+// please see, Ozyigit, EB (2020) MuCIGREF: Multiple Computer-interpretable Guideline Representation
+// and Execution Framework For Managing Multimorbidity Care. PhD Thesis, University of Warwick
+//
+
+// Part of MuCIGREF's Multiple CIG Execution Engine (MuCEE) execution codes of CIG acquisition execution 
+// which is written with Epsilon Object Language (EOL) of Eclipse.
+// For parallel execution codes and more, please get in touch via edaozyigit.com/contact
+
+//Create a blank personal care plan for each patient e.g.,"...P0001"
+var emfTool = new Native("org.eclipse.epsilon.emc.emf.tools.EmfTool");
+var ecoreUtil = emfTool.ecoreUtil;
+
+var mucigref = new PersonalCarePlan!MuCIGREF;
+	mucigref.label= "PECAPP0001";
+
+	
+var patientCarePersonalisation = 
+	new PersonalCarePlan!PatientCarePersonalisation;
+	patientCarePersonalisation.label ="PECAPP0001PCP";
+	mucigref.pcp.add(patientCarePersonalisation);	
+	
+		
+var multiActivityManagement = 
+	new PersonalCarePlan!MultiActivityManagement;
+	multiActivityManagement.label= "PECAPP0001MAN";
+	mucigref.man.add(multiActivityManagement);	
+
+
+var healthCareService =
+	new PersonalCarePlan!HealthCareService;
+	healthCareService.label = "PECAPP0001HES";
+	mucigref.hes.add(healthCareService);	
+
+
+var guidelineServiceDeployment =
+	new PersonalCarePlan!GuidelineServiceDeployment;
+	guidelineServiceDeployment.label = "PECAPP0001GSD";
+	mucigref.gsd.add(guidelineServiceDeployment);		
+
+
+// Transfer only 'active' clinical activities from clinical guidelines to the care plan
+
+var CIGModelHES = new PersonalCarePlan!HealthCareService;
+	CIGModelHES.label = "CIGModelHES";
+	mucigref.hes.add(CIGModelHES);
+
+
+for (x in CIGModel!ClinicalActivity.all){
+		if(x.hasActivityLifecycleStatus.name == "active"){
+		var PersonalCarePlanClinicalActivity = ecoreutil.copy(x);
+			CIGModelHES.isaHes.add(PersonalCarePlanClinicalActivity);
+		}
+		else{
+		System.out.println("Existing clinical activities are not eligible or available for the existing care");
+		}
+	
