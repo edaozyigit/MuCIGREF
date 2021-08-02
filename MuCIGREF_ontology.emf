@@ -1,0 +1,706 @@
+//Author: Eda Bilici Ozyigit
+//please see, Ozyigit, EB (2020) MuCIGREF: Multiple Computer-interpretable Guideline Representation
+// and Execution Framework For Managing Multimorbidity Care. PhD Thesis, University of Warwick
+
+// MuCIGREF's ontology, called, Multiple Computer-interpretable Guideline Language (MuCRL) is 
+// presented in Eclipse Modeling Framework (EMF) format.
+
+@namespace(uri="MuCIGREF", prefix="mucigref")
+package mucigref;
+
+
+class MuCIGREF  {
+	id attr String [1] label;
+	attr String [0..*] comment;
+	val PatientCarePersonalisation [0..*] pcp;
+	val GuidelineServiceDeployment [0..*] gsd;
+	val HealthCareService [0..*] hcs;
+	val MultiActivityManagement [0..*] man;
+}
+
+
+class PatientCarePersonalisation  {
+	id attr String [1] label;
+	attr String [0..*] comment;
+	attr String [1] definition;	
+	val PCPContainer [0..*] isaPcp;
+}	
+
+abstract class PCPContainer {
+	id attr String [1] label;
+	attr String [0..*] comment;
+	attr String [1] definition;	
+}	
+
+class Patient extends PCPContainer{
+ 	attr String [1] patientForename; 
+	attr String [0..*] patientMiddleName; 
+	attr String [1] patientSurname;
+	attr String [0..1] patientNameSuffix;
+	attr String [0..1] patientEmail;
+	attr String [1] patientAddress;
+	attr Long [1..*] patientPhoneNumber;
+	attr Integer [1] patientAge;
+	attr String [1] patientGender;
+	attr Long [1] patientBirthDate;
+	attr String [1] patientEthnicity;
+	ref PatientEncounter [1..*] hasPatientEncounter;
+	ref PatientDetail [1] hasPatientDetail;
+	attr String [1] patientID;
+	
+}
+
+
+class PatientDetail extends PCPContainer{
+	attr String [0..1] patientOccupation;
+	attr Integer[0..1] patientWeight;
+	attr Integer [0..1] patientHeight;
+	attr String [0..1] patientMarritalPartnershipStatus;
+	attr String [1] patientCountryOfBirth;
+	attr String [1..*] patientCountryOfResidence;
+	attr String [0..*] patientLifeStyleInformation;	
+	attr String [0..1] patientReligious;
+	attr String [0..1] patientEducationLevel;
+	attr Long [1] lastUpdateOnPatientDetail;
+}
+
+  
+
+class PatientEncounterDetail extends PCPContainer{	
+	attr PatientAdmission [1] hasPatientAdmissionType;
+	attr PointOfCare [1] hasPointOfCare; 	
+	attr String [1] encounterDefinition;
+	attr Long [1] admissionDate;
+}
+
+
+enum PatientHealthState{
+	good=0;
+	moderate=1;
+	severe=2;
+	unknownSeverity=3;	
+}
+
+
+enum PatientHealthStateChange{
+	decreasing=0;
+	increasing=1;
+	improving=2;
+	stable=3;
+	worsening=4;
+	otherChangesInHealthState=5;
+}
+
+
+class GuidelineServiceDeployment{
+	id attr String [1] label;
+	attr String [0..*] comment;
+	attr String [1] definition;
+	val GSDContainer [0..*] isaGsd;
+}
+
+
+abstract class GSDContainer{
+	id attr String [1] label;
+	attr String [0..*] comment;
+	attr String [1] definition;
+}
+
+
+class Carer extends GSDContainer{
+	attr String [1] carerForename;
+	attr String [1] carerSurname;
+	attr String [0..1] carerEmail;
+	attr Long [1..*] carerPhoneNumber;
+	! unique attr String [1] carerID; 
+	attr SpecialtyArea [1..*] hasSpecialty;
+}
+
+
+class ClinicalPracticeGuideline extends GSDContainer {
+	attr String [1] creatorOfGuideline;
+	attr Long [1] guidelineCreationTime;  
+   	attr Long [1] guidelineLastUpdate; 
+   	attr String [1] guidelineDescription;
+   	attr String [1] guidelineName;
+   	attr String [1] version;  
+   	!unique attr Long [0..1] clinicalID;
+   	attr String [0..1] sourceOfClinicalID;
+   	attr String [1..*] intendedUser;
+	attr String [1..*] targetPatients;
+	attr ClinicalGuidance [1..*] hasClinicalGuidance;
+	attr PatientGroup [1] hasPatientGroup;
+	attr SpecialtyArea [1..*] hasSpecialtyArea;
+}	
+
+enum ClinicalGuidance{
+   counseling=0;
+   diagnosis=1;
+   evaluation=2;
+   management=3;
+   prevention=4;
+   assessment=5;
+   screening=6;
+   recognition=7;
+   treatment=8;
+   otherClinicalGuidance=9;
+}
+	
+
+enum SpecialtyArea{
+	audiology=0;
+	cardiology=1;
+	dentistry=2;
+	dermotology=3;
+	diabetologyAndEndocrinology=4;
+	dieteticsAndNutrition=5;
+	endocrinology=6;
+	gastroenterology=7;
+	nephrology=8;
+	neurology=9;
+	nursing=10;
+	rheumatology=11;
+	obstetricsAndGynecology=12;
+	oncology=13;
+	prostheticsOrOrthotics=14;
+	psychiatry=15;
+	psychology=16;
+	radiologicalSpecialties=17;
+	surgicalSpecialty=18; 
+	otherSpecialtyArea=19;	
+}
+
+
+enum PatientAdmission{
+	inpatient=0;
+	outpatient=1;
+}
+
+
+enum PatientGroup{
+	adult=0;
+	elderly=1;
+	child=2;
+	infant=3;
+}
+
+
+enum PointOfCare{
+	hospital=0;
+	generalPractice=1;
+	home=2;
+	otherCarePoint=3;
+}
+
+
+class HealthCareService  {
+	id attr String [1] label;
+	attr String [0..*] comment;
+	attr String [1] definition;
+	val HCSContainer [0..*] isaHcs;
+}
+
+abstract class HCSContainer{
+	id attr String [1] label;
+	attr String [0..*] comment;
+	attr String [1] definition;
+}
+
+
+abstract class CareElement extends HCSContainer {
+	!unique attr Long [0..1] clinicalID;
+	attr String [0..1] sourceOfClinicalID;
+}
+
+
+class Examination extends CareElement {
+	attr String [1] examinationName;
+	attr String [1] examinationDefinition; 
+	attr String [0..1] costUnit;
+	attr Float [0..1] costValue;
+}
+
+
+class OtherCareElement extends CareElement {
+	attr String [1] otherCareElementName;
+	attr String [1] otherCareElementDefinition;
+}
+
+
+class Procedure extends CareElement{
+	attr String [1] procedureName;
+	attr String [1] procedureDefinition;
+}
+
+
+class PharmaceuticalCareElement extends CareElement{
+	attr Boolean [1] firstLineTherapy;
+	attr String [0..1] otherTypeOfTherapy;
+	attr String [0..1] activeIngredient;
+	attr String [1] applicationDose;
+	attr String [1] dose;
+	attr String [0..*] possibleSideEffect;
+	attr String [1] pharmaceuticalElementName;
+	attr String [1] pharmaceuticalElementDefinition;
+	attr String [1] methodOfPharmaceuticalAdministration;
+	attr String [0..1] costUnit;
+	attr Float [0..1] costValue;
+	
+}
+
+abstract class CareWorkFlowConstruct extends HCSContainer {
+}
+
+
+
+abstract class ActivityExecutionStatus extends CareWorkFlowConstruct{
+	attr ActivityConcurrencyStatus [0..*] acs;
+	attr ActivityLifecycleStatus [0..*] als;
+	attr ActivitySynchronisationStatus [0..*] asn;
+	attr ActivityTimeStatus [0..*] ats;
+}
+
+
+
+enum ActivityConcurrencyStatus{
+	concurrencyStarted=0;
+	concurrencyCompleted=1;
+	concurrencyDiscarded=2;
+}
+
+
+
+enum ActivityLifecycleStatus{
+   active=0;
+   passive=1;
+   started=2;
+   done=3;
+   cancelled=4;
+   pending=5;
+}
+
+
+enum ActivitySynchronisationStatus {
+   toBeSynchronised=0;
+   synchronisationDiscarded=1;
+   synchronisationPointReached=2;
+}
+
+
+enum ActivityTimeStatus{
+	actualStartTime=0;
+	actualEndTime=1;
+	expectedEndTime=2;
+	expectedStartTime=3;
+}
+
+
+abstract class ActivityTransition extends CareWorkFlowConstruct{	
+}
+
+
+class TransitionAssigned extends ActivityTransition {
+	!ordered ref ClinicalActivity [0..1] hasSourceActivity;
+	!ordered ref ClinicalActivity [0..1] hasTargetActivity;
+	attr TransitionLabel [1] hasTransitionLabel;
+}
+
+
+class TransitionCondition extends ActivityTransition{
+	attr ComparisonOperation [1] hasComparisonOperation;
+	attr String [0..1] qualitativeValue;
+	attr Float [0..1] quantitativeValue;
+	attr String [1] conditionParameter; 
+	attr String [0..1] unit; 
+	!unique attr Long [0..1] clinicalID;
+	attr String [0..1] sourceOfClinicalID;
+}
+
+
+
+class TransitionConditionAssigned extends ActivityTransition {
+	ref TransitionConditionList [1..*] hasConditionList;
+	attr TransitionConditionType [1] hasConditionType;
+	attr RestrictionOperation [1] hasRestriction;
+	attr Boolean [1] isConditionMet;
+	attr Integer [1] numberOfConditionList;
+	attr Integer [1] restrictionValue;
+}
+
+
+
+class TransitionConditionList extends ActivityTransition{
+	ref TransitionCondition [1..*] hasCondition;
+	attr Integer [1] numberOfCondition;
+	attr RestrictionOperation [1] hasRestriction;
+	attr Integer [1] restrictionValue;
+}
+
+
+enum TransitionConditionType {
+	activatingCondition=0;
+	preCondition=1;
+	outcomeCondition=2;
+	endCondition=3;
+}
+
+
+
+enum TransitionLabel{
+	hasStartingActivity=0;
+	hasFollowingActivity=1;
+	hasAlternativeActivity=2;
+	hasConditionalOption=3;
+	hasAlternativeConditionalOption=4;
+	isMergedAt=5;
+	hasSplit=6;
+}
+
+
+abstract class OperationType extends CareWorkFlowConstruct{
+	attr ComparisonOperation [0..*] cop;
+	attr RestrictionOperation [0..*] res;
+}
+
+
+enum ComparisonOperation{
+   differentFrom=0;
+   equalTo=1;
+   greaterOrEqualThan=2;
+   greaterThan=3;
+   lessOrEqualThan=4;
+   lessThan=5;
+   moreThan=6;
+   notEqualTo=7;
+}
+
+
+
+enum RestrictionOperation {
+   all=0;
+   any=1;
+   max=2;
+   min=3;
+}
+
+
+class Parameter extends CareWorkFlowConstruct{
+	attr Float [0..1] parameterNumericValue;
+	attr String [0..1] parameterTextValue;
+	!ordered attr String [0..1]parameterOrdinalValue;
+	attr String [1] parameterName;
+	attr Boolean [1] scaleTypeNumeric;
+	attr String [1] parameterDefinition;
+	!unique attr Long [0..1] clinicalID;
+	attr String [0..1] sourceOfClinicalID;
+	attr String [0..1] unit;
+}
+
+
+abstract class TemporalConstraint extends CareWorkFlowConstruct  {
+	attr TemporalUnit [1] hasTemporalUnit;
+}
+
+
+class Delay extends TemporalConstraint{
+	attr Float [0..1] maxDelay;
+	attr Float [0..1] minDelay; 
+	attr Float [0..1] delay;
+}
+
+
+
+class Duration extends TemporalConstraint{
+	attr Float [0..1] maxDuration;
+	attr Float [0..1] minDuration; 
+	attr Float[0..1] duration;
+}
+
+
+class Periodicity extends TemporalConstraint {
+	attr Float [0..1] maxPeriodicity;
+	attr Float [0..1] minPeriodicity;
+	attr Float [0..1] periodicity;
+	attr Integer [0..1] frequency;
+}
+
+
+ class TemporalDistance extends TemporalConstraint {
+	attr Float [0..1] maxTemporalDistance;
+	attr Float [0..1] minTemporalDistance;
+	attr Float [0..1] temporalDistance;	
+}
+
+
+class TemporalLimit extends TemporalConstraint{
+	attr Float [0..1] maxTemporalLimit;
+	attr Float [0..1] minTemporalLimit;
+	attr Float [0..1] temporalLimit; 	
+	attr Long [0..1] deadline;
+}
+
+
+enum TemporalUnit {
+	day=0;
+	hour=1;
+	minute=2;
+	month=3;
+	second=4;
+	week=5;
+	year=6;
+}
+
+
+class TemporalWindow extends TemporalConstraint{
+	attr Float [0..1] maxTemporalWindow;
+	attr Float [0..1] minTemporalWindow;
+	attr Float [0..1] temporalWindow;	
+}
+
+
+abstract class ClinicalActivity extends HCSContainer {
+	!unique attr Long [0..1] clinicalID;
+	attr String [0..1] sourceOfClinicalID;
+}
+
+
+abstract class ClinicalActivityContainer extends ClinicalActivity{
+	ref Carer [1..*] hasCarer;
+	attr ActivityLifecycleStatus [1] hasActivityLifecycleStatus;
+	ref TransitionConditionAssigned [0..*] hasTransitionConditionAssigned; 
+	attr ActivityTimeStatus [2] hasTimeStatus;
+	attr Long [0..1] actionStartTime;
+	attr Long [0..1] actionEndTime;
+	!ordered ref TransitionAssigned [0..*] hasIncomingTransition;
+	!ordered ref TransitionAssigned [0..*] hasOutgoingTransition;
+}
+
+
+
+abstract class ConstraintContainer{
+	ref TimeBasedSynchronisationConstraint [0..*] needsSynchronisation;
+	ref ConcurrencyConstraint [0..*] hasConcurrency;
+	ref ModificationConstraint [0..*] needsModification;
+	ref TimeBasedOptimisationConstraint [0..*] needsOptimisation;	
+}
+
+
+abstract class TemporalContainer{
+	ref Duration [0..1] hasDuration; 
+	ref Delay [0..1] hasDelay; 	
+	ref Periodicity [0..1] hasPeriodicity; 
+	ref TemporalLimit [0..1] hasTemporalLimit;
+	attr Boolean [0..1] withinTemporalLimit; 
+	
+}
+
+
+abstract class ClinicalActivityCommonality extends ClinicalActivityContainer, ConstraintContainer, TemporalContainer{
+	
+}
+
+
+abstract class ClinicalFindingContainer{
+	ref ClinicalFinding [0..*] hasClinicalFinding;
+}
+
+
+abstract class TemporalCommonality{
+	ref TemporalWindow [0..1] hasTemporalWindow; 
+}
+
+
+abstract class ResultContainer{
+	ref Result [0..*] hasResult;
+}
+
+
+class Conclusion extends ClinicalActivityContainer{
+	attr Long [0..1] dischargeDate;
+}
+
+
+class DataQuery extends ClinicalActivityContainer {
+	ref Parameter [1..*] hasQueryParameter;
+}
+
+
+class Decision extends ClinicalActivityContainer{	
+	ref TimeBasedSynchronisationConstraint [0..*] needsSynchronisation;
+	ref ConcurrencyConstraint [0..*] hasConcurrency;
+}
+
+
+class ExaminationAction extends ClinicalActivityCommonality, TemporalCommonality, ResultContainer {
+	ref Examination [1] hasExamination;
+}
+
+
+class OtherAction extends ClinicalActivityCommonality, ClinicalFindingContainer, TemporalCommonality, ResultContainer{
+	ref OtherCareElement [1] hasOtherCareElement;
+}
+
+
+class PatientEncounter extends ClinicalActivityContainer, ClinicalFindingContainer {
+	ref PatientEncounterDetail [1..*] hasPatientEncounterDetail;
+}
+
+
+class PharmaceuticalAction extends ClinicalActivityCommonality {
+	ref PharmaceuticalCareElement [1] hasPharmaceuticalCareElement ;
+	attr Boolean [1] isPatientAllergyChecked;
+	
+}
+ 
+
+class ProceduralAction extends ClinicalActivityCommonality, ClinicalFindingContainer, TemporalCommonality, ResultContainer{
+	ref Procedure [1] hasProcedure;	
+}
+
+
+class Schedule extends ClinicalActivityContainer, TemporalContainer {
+	
+} 
+	
+
+class ClinicalFinding extends HCSContainer {
+	attr String [1] clinicalFindingDefinition;
+	ref ClinicalPracticeGuideline [0..*] hasAssociatedClinicalGuideline;
+	ref DisorderDetail [0..*] hasDisorderDetail;
+	attr PatientHealthState [1] hasCurrentHealthState;
+	attr PatientHealthStateChange [0..1] hasHealthStateChangeStatus;
+}
+
+
+abstract class Disorder extends HCSContainer {	
+	!unique attr Long [0..1] clinicalID;	
+	attr String [0..1] sourceOfClinicalID;
+}
+
+
+class CauseOfDisorder extends Disorder{
+
+}
+
+
+class AdverseInteraction extends CauseOfDisorder{
+	attr AdverseInteractionType [1] hasAdverseInteractionType;
+	attr String [1] adverseInteractionDefinition; 
+}
+
+
+enum AdverseInteractionType{
+	drugDrug=0;
+	drugFood=1;
+	drugDisease=2;
+	drugPatient=3;
+	timing=4;
+	otherInteraction=5;
+}
+
+
+class OtherCauseOfDisorder extends CauseOfDisorder{
+	attr String [1] disorderCauseName;
+	attr String [1] disorderCauseDefinition;
+}
+
+
+
+class DisorderDetail extends Disorder {
+	attr DisorderType [1] hasDisorderType; 
+	ref AdverseInteraction [0..*] isACauseOfDisorder;
+	ref OtherCauseOfDisorder [0..*] hasOtherCause;
+}
+
+enum DisorderType{
+	disease=0; 
+	syndrome=1;
+	sign=2;
+	symptom=3;
+	allergicCondition=4;
+	acquiredAbnormality=5;
+	adverseInteraction=6;
+	anatomicalAbnormality=7;
+	cellOrMolecularDysfunction=8;
+	injuryOrPoisoning=9;
+	mentalOrBehavioralDysfunction=10;
+	otherDisorder=11;
+}
+
+
+class Result extends HCSContainer {	
+	attr Boolean [0..1] booleanResult;
+	attr String [0..1] qualitativeResult;
+	attr String [0..1] quantitativeResult;
+	ref Parameter [1..*] hasResultParameter;
+}
+
+
+class MultiActivityManagement  {
+	id attr String [1] label;
+	attr String [0..*] comment;
+	attr String [1] definition;
+	val MANContainer [0..*] isaMan;
+}
+
+abstract class MANContainer{
+	id attr String [1] label;
+	attr String [0..*] comment;
+	attr String [1] definition;
+	
+}
+
+
+class ConcurrencyConstraint extends MANContainer  {
+	attr Long [1] concurrencyStartTime;  
+   	attr Long [1] concurrencyEndTime; 
+   	attr ActivityConcurrencyStatus [1] hasActivityConcurencyStatus;
+}
+
+
+class ModificationConstraint extends MANContainer {
+	ref CareElement [0..1] hasCareElementModification;
+	ref CareElement [0..1] hasCareElementReplacementWith;	
+	attr String [0..1] descriptionOfModification;
+	attr Long [1] modificationTime;
+}
+
+
+class TimeBasedOptimisationConstraint extends MANContainer {
+	ref TemporalWindow [0..1]canBeReusedFor;
+	attr Boolean [0..1]withinTemporalWindow;
+	attr Boolean [1] needMoreAction;
+	ref ClinicalActivity [0..1] reuseCareElementOf;
+	ref CareElement [0..1] reuseCareElement;
+	ref ClinicalActivity [0..1] reuseResultOf;
+	ref Result [1..*] reuseResult;
+}
+
+
+class TimeBasedSynchronisationConstraint extends MANContainer  {
+	attr ActivitySynchronisationStatus [1] hasActivitySyncStatus;
+	ref TemporalDistance [0..1] hasTemporalDistance;
+	ref TemporalLimit [1] hasTemporalLimit;
+	attr Boolean [1] withinTemporalLimit;
+	attr Long [1] syncLastUpdate; 
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
